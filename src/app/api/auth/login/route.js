@@ -6,6 +6,7 @@ export async function POST(req) {
   const u = process.env.FIXED_USERNAME || "";
   const p = process.env.FIXED_PASSWORD || "";
   const cookieName = process.env.AUTH_COOKIE_NAME || "tz_auth";
+console.log("u=", process.env.FIXED_USERNAME, "p=", process.env.FIXED_PASSWORD);
 
   if (username !== u || password !== p) {
     return NextResponse.json({ ok: false, message: "Invalid credentials" }, { status: 401 });
