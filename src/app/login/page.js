@@ -1,99 +1,67 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter();
   const sp = useSearchParams();
-  const next = sp.get("next") || "/tag";
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const nextPath = useMemo(() => sp.get("next") || "/tag", [sp]);
+
+  const [u, setU] = useState("");
+  const [p, setP] = useState("");
   const [err, setErr] = useState("");
-  const [loading, setLoading] = useState(false);
 
   async function onSubmit(e) {
     e.preventDefault();
     setErr("");
-    setLoading(true);
-    try {
-      const r = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
 
-      if (!r.ok) {
-        const j = await r.json().catch(() => ({}));
-        throw new Error(j.message || "Login failed");
-      }
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: u, password: p, next: nextPath }),
+    });
 
-      router.push(next);
-      router.refresh();
-    } catch (e2) {
-      setErr(e2.message || "Login failed");
-    } finally {
-      setLoading(false);
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data?.ok) {
+      setErr(data?.message || "Login failed");
+      return;
     }
+
+    router.replace(data.redirect || nextPath);
   }
 
   return (
-    <div style={s.page}>
-      <div style={s.card}>
-        <div style={s.header}>
-          <div style={s.logo} />
-          <div>
-            <div style={s.title}>Tag Generator</div>
-            <div style={s.sub}>Login with fixed username/password</div>
-          </div>
+    <div style={{ minHeight: "100vh", display: "grid", placeItems: "center", padding: 20 }}>
+      <form onSubmit={onSubmit} style={{ width: 360, maxWidth: "100%", background: "#fff", border: "1px solid #e5e7eb", borderRadius: 14, padding: 16 }}>
+        <h2 style={{ margin: 0, fontWeight: 900 }}>Login</h2>
+
+        <div style={{ marginTop: 12 }}>
+          <label style={{ fontSize: 13, fontWeight: 800 }}>Username</label>
+          <input value={u} onChange={(e) => setU(e.target.value)} style={{ width: "100%", marginTop: 6, padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb" }} />
         </div>
 
-        <form onSubmit={onSubmit} style={{ marginTop: 16 }}>
-          <label style={s.label}>Username</label>
-          <input
-            style={s.input}
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            autoComplete="username"
-            placeholder="travelzeed"
-          />
-
-          <label style={{ ...s.label, marginTop: 12 }}>Password</label>
-          <input
-            style={s.input}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            autoComplete="current-password"
-            type="password"
-            placeholder="••••"
-          />
-
-          {err ? <div style={s.err}>{err}</div> : null}
-
-          <button style={s.btn} disabled={loading}>
-            {loading ? "Signing in..." : "Sign in"}
-          </button>
-        </form>
-
-        <div style={s.note}>
-          ตั้งค่าใน <code>.env.local</code>: FIXED_USERNAME / FIXED_PASSWORD
+        <div style={{ marginTop: 12 }}>
+          <label style={{ fontSize: 13, fontWeight: 800 }}>Password</label>
+          <input type="password" value={p} onChange={(e) => setP(e.target.value)} style={{ width: "100%", marginTop: 6, padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb" }} />
         </div>
-      </div>
+
+        {err ? <div style={{ marginTop: 10, color: "#b91c1c", fontWeight: 800, fontSize: 13 }}>{err}</div> : null}
+
+        <button type="submit" style={{ marginTop: 14, width: "100%", padding: "10px 12px", borderRadius: 12, border: "none", background: "#ff6a00", color: "#fff", fontWeight: 900, cursor: "pointer" }}>
+          Sign in
+        </button>
+      </form>
     </div>
   );
 }
 
-const s = {
-  page: { minHeight: "100vh", display: "grid", placeItems: "center", background: "#f6f7fb", padding: 18, fontFamily: 'system-ui, -apple-system, "Segoe UI", Arial' },
-  card: { width: "100%", maxWidth: 420, background: "#fff", border: "1px solid #e5e7eb", borderRadius: 14, boxShadow: "0 12px 30px rgba(0,0,0,.06)", padding: 18 },
-  header: { display: "flex", gap: 12, alignItems: "center" },
-  logo: { width: 40, height: 40, borderRadius: 12, background: "linear-gradient(135deg,#ff6a00,#ff8a3d)", boxShadow: "0 10px 18px rgba(255,106,0,.25)" },
-  title: { fontWeight: 900, fontSize: 18, color: "#111827" },
-  sub: { fontSize: 12, color: "#6b7280", fontWeight: 700 },
-  label: { display: "block", fontWeight: 800, fontSize: 13, marginBottom: 6 },
-  input: { width: "100%", padding: "10px 12px", borderRadius: 12, border: "1px solid #e5e7eb", outline: "none" },
-  btn: { width: "100%", marginTop: 14, background: "#ff6a00", color: "#fff", border: "none", borderRadius: 12, padding: "10px 12px", fontWeight: 900, cursor: "pointer" },
-  err: { marginTop: 10, fontSize: 12, color: "#991b1b", background: "#fee2e2", border: "1px solid #fecaca", padding: "8px 10px", borderRadius: 12, fontWeight: 800 },
-  note: { marginTop: 12, fontSize: 12, color: "#6b7280", lineHeight: 1.4 },
-};
+export default function LoginPage() {
+  // ✅ สำคัญ: useSearchParams ต้องอยู่ใน Suspense เพื่อให้ prerender ผ่าน
+  return (
+    <Suspense fallback={<div style={{ padding: 20 }}>Loading…</div>}>
+      <LoginInner />
+    </Suspense>
+  );
+}
