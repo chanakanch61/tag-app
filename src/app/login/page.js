@@ -62,9 +62,24 @@ function LoginInner() {
             height: 40,
             borderRadius: 12,
             background: "linear-gradient(135deg,#ff6a00,#ff8a3d)",
-            boxShadow: "0 10px 18px rgba(255,106,0,.25)"
-          }}
-        />
+            boxShadow: "0 10px 18px rgba(255,106,0,.25)",
+            display: "flex",
+            alignItems : "center",
+            justifyContent: "center"
+        
+          }}>
+             <span
+              className="material-symbols-outlined icon"
+              style={{
+                fontSize: 24,
+                color: "#fff",
+                verticalAlign: "middle",
+              }}
+            >
+              loyalty
+            </span>
+        </div>
+       
         <div>
           <div style={{ fontWeight: 900, fontSize: 18, color: "#111827" }}>
             Login

@@ -1,8 +1,20 @@
-export const metadata = { title: "Tag SaaS" };
+export const metadata = {
+  title: "Tag Generator",
+  icons: {
+    icon: "/icon.png",
+
+  },
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="th">
+       <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined"
+          rel="stylesheet"
+        />
+      </head>
       <body>{children}</body>
     </html>
   );

@@ -10,7 +10,7 @@ export default function TagPage() {
 
   const [mode, setMode] = useState("manual"); // manual | excel
   const [templateFile, setTemplateFile] = useState(null);
-  const [travelDate, setTravelDate] = useState("26 Feb - 02 Mar 2026");
+  const [travelDate, setTravelDate] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // manual rows
@@ -147,7 +147,16 @@ export default function TagPage() {
     <div className={styles.page}>
       <div className={styles.top}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className={styles.logo} />
+          <div className={styles.logo}> <span
+              className="material-symbols-outlined icon"
+              style={{
+                fontSize: 24,
+                color: "#fff",
+                verticalAlign: "middle",
+              }}
+            >
+              loyalty
+            </span></div>
           <div>
             <div style={{ fontWeight: 900 }}>Tag Generator</div>
             <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>
@@ -189,7 +198,7 @@ export default function TagPage() {
                 <div className={styles.hint}>รองรับ .png/.jpg</div>
               </div>
               <div>
-                <label className={styles.label}>วันเดินทาง</label>
+                <label className={styles.label}>วันเดินทาง *ตัวอย่าง 26 Feb - 02 Mar 2026</label>
                 <input
                   className={styles.inputText}
                   value={travelDate}
@@ -394,7 +403,7 @@ export default function TagPage() {
               • Export จะสร้างไฟล์ตามจำนวนลูกค้า
               <br />
               • ชื่อไฟล์: No_Fullname.png
-              <br />• หากชื่อยาวมาก แนะนำให้ตัด/ย่อเพื่อความสวยงาม
+              <br />• หากชื่อยาวมาก ให้แจ้ง Support
             </div>
           </div>
         </aside>
