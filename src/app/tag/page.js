@@ -10,7 +10,7 @@ export default function TagPage() {
 
   const [mode, setMode] = useState("manual"); // manual | excel
   const [templateFile, setTemplateFile] = useState(null);
-  const [travelDate, setTravelDate] = useState(null);
+  const [travelDate, setTravelDate] = useState("26 Feb - 02 Mar 2026");
   const [previewUrl, setPreviewUrl] = useState(null);
 
   // manual rows
@@ -29,17 +29,13 @@ export default function TagPage() {
   };
   const activeRows = mode === "manual" ? rows : excelRows;
   const canExport = useMemo(() => {
-  if (!templateFile) return false;
-
-  if (!(travelDate || "").trim()) return false;
-
-  const okNames = activeRows.filter(
-    (r) => (r?.fullname || "").trim().length > 0
-  );
-
-  return okNames.length > 0;
-}, [templateFile, travelDate, activeRows]);
-
+    if (!templateFile) return false;
+    if (!travelDate.trim()) return false;
+    const okNames = activeRows.filter(
+      (r) => String(r.fullname || "").trim().length > 0,
+    );
+    return okNames.length > 0;
+  }, [templateFile, travelDate, activeRows]);
 
   function addRow() {
     setRows((r) => [...r, { no: String(r.length + 1), fullname: "" }]);
