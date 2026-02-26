@@ -1,10 +1,4 @@
-export const metadata = {
-  title: "Tag Generator",
-  icons: {
-    icon: "/icon.png",
-
-  },
-};
+export const metadata = { title: "Tag Generator" };
 
 export default function RootLayout({ children }) {
   return (

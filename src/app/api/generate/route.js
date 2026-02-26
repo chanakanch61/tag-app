@@ -1,6 +1,33 @@
 import archiver from "archiver";
 import sharp from "sharp";
+import fs from "fs/promises";
+import path from "path";
 
+export const runtime = "nodejs"; // กันเผลอไปรัน edge
+
+let FONT_REG_B64 = null;
+let FONT_BOLD_B64 = null;
+
+async function loadFontsOnce() {
+  if (FONT_REG_B64 && FONT_BOLD_B64) return;
+
+  const regPath = path.join(process.cwd(), "public", "fonts", "DB Helvethaica X Bd Cond v3.2.ttf");
+  const boldPath = path.join(process.cwd(), "public", "fonts", "DB Helvethaica X Bd Cond v3.2.ttf");
+
+  const [regBuf, boldBuf] = await Promise.all([fs.readFile(regPath), fs.readFile(boldPath)]);
+  FONT_REG_B64 = regBuf.toString("base64");
+  FONT_BOLD_B64 = boldBuf.toString("base64");
+}
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
+    "&": "&amp;",
+    "<": "&lt;",
+    ">": "&gt;",
+    '"': "&quot;",
+    "'": "&#039;",
+  }[m]));
+}
 function makeSvg({ no, fullname, travelDate }) {
   // ปรับตำแหน่งตาม template ได้
   // - Date: stroke ดำ + fill #f0ff00 (เหมือนที่คุณทำใน PHP)
@@ -17,7 +44,21 @@ function makeSvg({ no, fullname, travelDate }) {
 
   return `
   <svg width="1028" height="650" xmlns="http://www.w3.org/2000/svg">
-    <text x="825" y="125"
+  <style>
+      @font-face {
+        font-family: 'KanitEmbed';
+        src: url(data:font/ttf;base64,${FONT_REG_B64}) format('truetype');
+        font-weight: 400;
+        font-style: normal;
+      }
+      @font-face {
+        font-family: 'KanitEmbed';
+        src: url(data:font/ttf;base64,${FONT_BOLD_B64}) format('truetype');
+        font-weight: 800;
+        font-style: normal;
+      }
+    </style>  
+  <text x="825" y="125"
       font-size="140"
       font-family="Arial"
        stroke="#000000"
