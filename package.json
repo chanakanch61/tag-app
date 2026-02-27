@@ -8,6 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.2",
     "archiver": "^7.0.1",
     "next": "16.1.6",
     "react": "19.2.3",

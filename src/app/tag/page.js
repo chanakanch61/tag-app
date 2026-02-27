@@ -127,12 +127,19 @@ export default function TagPage() {
     fd.append("travel_date", travelDate);
     fd.append("names_json", JSON.stringify(names));
 
-    const res = await fetch("/api/generate", { method: "POST", body: fd });
-    if (!res.ok) {
-      const txt = await res.text().catch(() => "");
-      alert("Export ไม่สำเร็จ: " + txt);
-      return;
-    }
+   const res = await fetch("/api/generate", { method: "POST", body: fd });
+
+const ct = res.headers.get("content-type") || "";
+if (!res.ok || !ct.includes("application/zip")) {
+  const txt = await res.text().catch(() => "");
+  alert(
+    "Export ไม่สำเร็จ\n" +
+      "status: " + res.status + "\n" +
+      "content-type: " + ct + "\n\n" +
+      txt.slice(0, 800)
+  );
+  return;
+}
 
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
