@@ -7,7 +7,7 @@ import { PassThrough, Readable } from "stream";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FONT_FILE = "Kanit-Bold.ttf";      // ✅ แก้ให้ตรงกับไฟล์จริงใน public/fonts
+const FONT_FILE = "ARIAL.TTF";      // ✅ แก้ให้ตรงกับไฟล์จริงใน public/fonts
 const FONT_FAMILY = "MyEmbed";
 const FONT_WEIGHT = 700;
 
