@@ -52,23 +52,17 @@ function makeSvg({ no, fullname, travelDate }) {
   else if (safeName.length > 24) nameFontSize = 42;
   else if (safeName.length > 20) nameFontSize = 45;
 
-  return `
-  <style>
-  @font-face{
-    font-family:'MyEmbed';
-    src:url(data:font/ttf;base64,${FONT_B64}) format('truetype');
-    font-weight:${FONT_WEIGHT};
-    font-style:normal;
-  }
-</style>
-<svg width="1028" height="650" xmlns="http://www.w3.org/2000/svg">
-  <style>
-    @font-face {
-      font-family: 'MyEmbed';
-     
-      
-    }
-  </style>
+  return `<svg width="1028" height="650" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      @font-face {
+        font-family: 'MyEmbed';
+        src: url(data:font/ttf;base64,${FONT_B64}) format('truetype');
+        font-weight: ${FONT_WEIGHT};
+        font-style: normal;
+      }
+    </style>
+  </defs>
 
   <text x="825" y="125"
     font-size="140"
@@ -82,7 +76,7 @@ function makeSvg({ no, fullname, travelDate }) {
 
   <text x="635" y="525"
     font-size="36"
-    font-family="${FONT_FAMILY}"
+    font-family="MyEmbed"
     fill="#f0ff00"
     stroke="#000000"
     stroke-width="10"
@@ -102,7 +96,6 @@ function makeSvg({ no, fullname, travelDate }) {
   </text>
 </svg>`;
 }
-
 async function genOnePng(templateBuffer, payload) {
   const svg = makeSvg(payload);
   return sharp(templateBuffer)
@@ -157,7 +150,7 @@ export async function POST(req) {
       });
     }
 
-    const archive = archiver("zip", { zlib: { level: 9 } });
+    const archive = archiver("zip", { zlib: { level: 6 } });
     const pass = new PassThrough();
     archive.pipe(pass);
 
