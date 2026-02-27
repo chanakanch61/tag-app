@@ -115,42 +115,65 @@ export default function TagPage() {
     }
   }
 
-  async function exportZip() {
+  function exportZipToCMS() {
     if (!canExport) return;
 
     const names = activeRows
-      .map((r) => ({ no: r.no, fullname: (r.fullname || "").trim() }))
+      .map((r, idx) => ({
+        no: String(r.no ?? idx + 1).trim(),
+        fullname: String(r.fullname || "").trim(),
+      }))
       .filter((r) => r.fullname);
 
-    const fd = new FormData();
-    fd.append("template", templateFile);
-    fd.append("travel_date", travelDate);
-    fd.append("names_json", JSON.stringify(names));
+    if (!templateFile) return alert("กรุณาเลือก Template");
+    if (!travelDate.trim()) return alert("กรุณาใส่วันเดินทาง");
+    if (!names.length) return alert("กรุณาใส่รายชื่ออย่างน้อย 1 คน");
 
-    const controller = new AbortController();
-    const t = setTimeout(() => controller.abort(), 120000);
+    // ✅ URL ปลายทาง CI3 (ปรับให้ตรงของจริง)
+    const url = "https://www.travelzeed.com/cms/tag/export";
 
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      body: fd,
-      signal: controller.signal,
-    }).finally(() => clearTimeout(t));
+    // ✅ สร้างฟอร์มแล้ว submit ไปเปิดแท็บใหม่ (ดาวน์โหลด zip ได้ชัวร์)
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = url;
+    form.enctype = "multipart/form-data";
+    form.target = "download_frame";
 
-    const ct = res.headers.get("content-type") || "";
-    if (!res.ok || !ct.includes("application/zip")) {
-      const txt = await res.text().catch(() => "");
-      alert(
-        `Export ไม่สำเร็จ\nstatus=${res.status}\ncontent-type=${ct}\n\n${txt.slice(0, 800)}`,
-      );
-      return;
-    }
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "tags.zip";
-    a.click();
-    URL.revokeObjectURL(url);
+    // travel_date
+    const travel = document.createElement("input");
+    travel.type = "hidden";
+    travel.name = "travel_date";
+    travel.value = travelDate;
+    form.appendChild(travel);
+
+    // template_image (ต้องเป็น input file จริง)
+    const fileInput = document.createElement("input");
+    fileInput.type = "file";
+    fileInput.name = "template_image";
+
+    const dt = new DataTransfer();
+    dt.items.add(templateFile);
+    fileInput.files = dt.files;
+    form.appendChild(fileInput);
+
+    // no[] และ fullname[]
+    names.forEach((p) => {
+      const iNo = document.createElement("input");
+      iNo.type = "hidden";
+      iNo.name = "no[]";
+      iNo.value = p.no;
+      form.appendChild(iNo);
+
+      const iName = document.createElement("input");
+      iName.type = "hidden";
+      iName.name = "fullname[]";
+      iName.value = p.fullname;
+      form.appendChild(iName);
+    });
+
+    document.body.appendChild(form);
+    form.submit();
+    form.remove();
   }
 
   return (
@@ -303,7 +326,7 @@ export default function TagPage() {
                           className={styles.cellInput}
                           value={r.fullname}
                           disabled={mode === "excel"}
-                          placeholder="MR. NOT NAJA"
+                          placeholder="MR. TRAVELEXPERT"
                           onChange={(e) =>
                             setField(idx, "fullname", e.target.value)
                           }
@@ -347,7 +370,7 @@ export default function TagPage() {
               <button
                 className={styles.primaryBtn}
                 disabled={!canExport}
-                onClick={exportZip}
+                onClick={exportZipToCMS}
               >
                 Export ZIP
               </button>
