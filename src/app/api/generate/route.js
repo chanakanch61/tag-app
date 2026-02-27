@@ -7,7 +7,7 @@ import { PassThrough, Readable } from "stream";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-const FONT_FILE = "Kanit-Bold.ttf";      // ✅ แก้ให้ตรงกับไฟล์จริงใน public/fonts
+const FONT_FILE = "Kanit-Bold.ttf"; // ✅ แก้ให้ตรงกับไฟล์จริงใน public/fonts
 const FONT_FAMILY = "MyEmbed";
 const FONT_WEIGHT = 700;
 
@@ -30,13 +30,17 @@ async function loadFontOnce() {
 }
 
 function esc(s) {
-  return String(s ?? "").replace(/[&<>"']/g, (m) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#039;",
-  }[m]));
+  return String(s ?? "").replace(
+    /[&<>"']/g,
+    (m) =>
+      ({
+        "&": "&amp;",
+        "<": "&lt;",
+        ">": "&gt;",
+        '"': "&quot;",
+        "'": "&#039;",
+      })[m],
+  );
 }
 
 function makeSvg({ no, fullname, travelDate }) {
@@ -49,20 +53,26 @@ function makeSvg({ no, fullname, travelDate }) {
   else if (safeName.length > 20) nameFontSize = 45;
 
   return `
+  <style>
+  @font-face{
+    font-family:'MyEmbed';
+    src:url(data:font/ttf;base64,${FONT_B64}) format('truetype');
+    font-weight:${FONT_WEIGHT};
+    font-style:normal;
+  }
+</style>
 <svg width="1028" height="650" xmlns="http://www.w3.org/2000/svg">
   <style>
     @font-face {
-      font-family: '${FONT_FAMILY}';
-      src: url(data:font/ttf;base64,${FONT_B64}) format('truetype');
-      font-weight: ${FONT_WEIGHT};
-      font-style: normal;
+      font-family: 'MyEmbed';
+     
+      
     }
   </style>
 
   <text x="825" y="125"
     font-size="140"
-    font-family="${FONT_FAMILY}"
-    font-weight="${FONT_WEIGHT}"
+    font-family="MyEmbed"
     stroke="#000000"
     stroke-width="10"
     fill="#ffffff"
@@ -73,7 +83,6 @@ function makeSvg({ no, fullname, travelDate }) {
   <text x="635" y="525"
     font-size="36"
     font-family="${FONT_FAMILY}"
-    font-weight="${FONT_WEIGHT}"
     fill="#f0ff00"
     stroke="#000000"
     stroke-width="10"
@@ -85,8 +94,7 @@ function makeSvg({ no, fullname, travelDate }) {
 
   <text x="50%" y="580"
     font-size="${nameFontSize}"
-    font-family="${FONT_FAMILY}"
-    font-weight="${FONT_WEIGHT}"
+    font-family="MyEmbed"
     fill="#111827"
     text-anchor="middle"
     dominant-baseline="middle">
@@ -107,7 +115,10 @@ async function genOnePng(templateBuffer, payload) {
 function json(status, obj) {
   return new Response(JSON.stringify(obj), {
     status,
-    headers: { "Content-Type": "application/json; charset=utf-8", "Cache-Control": "no-store" },
+    headers: {
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store",
+    },
   });
 }
 
@@ -121,7 +132,10 @@ export async function POST(req) {
     const namesJson = form.get("names_json");
 
     if (!templateFile || typeof templateFile.arrayBuffer !== "function") {
-      return json(400, { ok: false, message: "template required (must be a file)" });
+      return json(400, {
+        ok: false,
+        message: "template required (must be a file)",
+      });
     }
     if (!namesJson) {
       return json(400, { ok: false, message: "names_json required" });
@@ -137,7 +151,10 @@ export async function POST(req) {
 
     const templateBuffer = Buffer.from(await templateFile.arrayBuffer());
     if (!templateBuffer || templateBuffer.length < 1000) {
-      return json(400, { ok: false, message: "template file invalid/too small" });
+      return json(400, {
+        ok: false,
+        message: "template file invalid/too small",
+      });
     }
 
     const archive = archiver("zip", { zlib: { level: 9 } });
@@ -150,9 +167,16 @@ export async function POST(req) {
           const no = p?.no ?? "";
           const fullname = p?.fullname ?? "";
 
-          const png = await genOnePng(templateBuffer, { no, fullname, travelDate });
+          const png = await genOnePng(templateBuffer, {
+            no,
+            fullname,
+            travelDate,
+          });
 
-          const fileSafe = String(fullname).replace(/[\\/:*?"<>|]/g, "").trim().slice(0, 80);
+          const fileSafe = String(fullname)
+            .replace(/[\\/:*?"<>|]/g, "")
+            .trim()
+            .slice(0, 80);
           const fname = `${String(no).padStart(2, "0")}_${fileSafe || "NAME"}.png`;
           archive.append(png, { name: fname });
         }
