@@ -127,20 +127,23 @@ export default function TagPage() {
     fd.append("travel_date", travelDate);
     fd.append("names_json", JSON.stringify(names));
 
-   const res = await fetch("/api/generate", { method: "POST", body: fd });
+    const controller = new AbortController();
+    const t = setTimeout(() => controller.abort(), 120000);
 
-const ct = res.headers.get("content-type") || "";
-if (!res.ok || !ct.includes("application/zip")) {
-  const txt = await res.text().catch(() => "");
-  alert(
-    "Export ไม่สำเร็จ\n" +
-      "status: " + res.status + "\n" +
-      "content-type: " + ct + "\n\n" +
-      txt.slice(0, 800)
-  );
-  return;
-}
+    const res = await fetch("/api/generate", {
+      method: "POST",
+      body: fd,
+      signal: controller.signal,
+    }).finally(() => clearTimeout(t));
 
+    const ct = res.headers.get("content-type") || "";
+    if (!res.ok || !ct.includes("application/zip")) {
+      const txt = await res.text().catch(() => "");
+      alert(
+        `Export ไม่สำเร็จ\nstatus=${res.status}\ncontent-type=${ct}\n\n${txt.slice(0, 800)}`,
+      );
+      return;
+    }
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -154,7 +157,9 @@ if (!res.ok || !ct.includes("application/zip")) {
     <div className={styles.page}>
       <div className={styles.top}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <div className={styles.logo}> <span
+          <div className={styles.logo}>
+            {" "}
+            <span
               className="material-symbols-outlined icon"
               style={{
                 fontSize: 24,
@@ -163,7 +168,8 @@ if (!res.ok || !ct.includes("application/zip")) {
               }}
             >
               loyalty
-            </span></div>
+            </span>
+          </div>
           <div>
             <div style={{ fontWeight: 900 }}>Tag Generator</div>
             <div style={{ fontSize: 12, color: "#6b7280", fontWeight: 700 }}>
@@ -205,7 +211,9 @@ if (!res.ok || !ct.includes("application/zip")) {
                 <div className={styles.hint}>รองรับ .png/.jpg</div>
               </div>
               <div>
-                <label className={styles.label}>วันเดินทาง *ตัวอย่าง 26 Feb - 02 Mar 2026</label>
+                <label className={styles.label}>
+                  วันเดินทาง *ตัวอย่าง 26 Feb - 02 Mar 2026
+                </label>
                 <input
                   className={styles.inputText}
                   value={travelDate}
