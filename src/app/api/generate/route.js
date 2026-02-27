@@ -3,7 +3,6 @@ import sharp from "sharp";
 import fs from "fs/promises";
 import path from "path";
 import { PassThrough, Readable } from "stream";
-import { Resvg } from "@resvg/resvg-js";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";

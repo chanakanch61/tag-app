@@ -10,16 +10,7 @@ export default function Home() {
       <div style={styles.card}>
         <div style={styles.logoBox}>
           <div style={styles.logo}>
-            <span
-              className="material-symbols-outlined icon"
-              style={{
-                fontSize: 32,
-                color: "#fff",
-                verticalAlign: "middle",
-              }}
-            >
-              loyalty
-            </span>
+ 
           </div>
         </div>
 
