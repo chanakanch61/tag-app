@@ -12,8 +12,8 @@ let FONT_BOLD_B64 = null;
 async function loadFontsOnce() {
   if (FONT_REG_B64 && FONT_BOLD_B64) return;
 
-  const regPath = path.join(process.cwd(), "public", "fonts", "ARIAL.ttf");
-  const boldPath = path.join(process.cwd(), "public", "fonts", "ARIAL.ttf"); // ถ้ามีไฟล์ Bold แยกค่อยเปลี่ยน
+  const regPath = path.join(process.cwd(), "public", "fonts", "ARIAL.TTF");
+  const boldPath = path.join(process.cwd(), "public", "fonts", "ARIAL.TTF"); // ถ้ามีไฟล์ Bold แยกค่อยเปลี่ยน
 
   const [regBuf, boldBuf] = await Promise.all([fs.readFile(regPath), fs.readFile(boldPath)]);
   FONT_REG_B64 = regBuf.toString("base64");
